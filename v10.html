@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -699,6 +699,50 @@ body {
 /* Confirm banner */
 #confirmBanner { display:none; position:fixed; top:calc(var(--nav-h) + 8px); left:50%; transform:translateX(-50%); background:var(--navy); color:white; padding:0.9rem 1.4rem; border-radius:var(--radius); box-shadow:var(--shadow-3); z-index:350; align-items:center; gap:0.8rem; font-size:0.85rem; max-width:500px; width:90%; border-left:3px solid var(--teal); }
 
+
+/* ── CATEGORY BANNERS ── */
+.cat-banner {
+  position: relative; overflow: hidden;
+  padding: 2.2rem 1.5rem 1.8rem;
+  border-bottom: 1px solid var(--border);
+}
+.cat-banner-bg {
+  position: absolute; inset: 0; z-index: 0;
+}
+.cat-banner-inner {
+  position: relative; z-index: 1;
+  max-width: 700px;
+}
+.cat-banner-icon {
+  font-size: 5rem; opacity: 0.12;
+  position: absolute; right: 1.5rem; top: 50%;
+  transform: translateY(-50%);
+  line-height: 1; z-index: 0;
+  pointer-events: none;
+}
+.cat-banner-label {
+  font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  opacity: 0.6; margin-bottom: 0.3rem; color: white;
+}
+.cat-banner-title {
+  font-family: 'Lora', serif; font-weight: 700;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  line-height: 1.15; color: white; margin-bottom: 0.4rem;
+}
+.cat-banner-tagline {
+  font-size: 0.85rem; opacity: 0.55; color: white; line-height: 1.5;
+}
+.cat-banner-count {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  margin-top: 0.8rem;
+  font-size: 0.72rem; font-weight: 600;
+  padding: 0.25rem 0.75rem; border-radius: 20px;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
 /* ── EMPTY & LOADING STATES ── */
 .empty-state { text-align:center; padding:4rem 2rem; }
 .empty-icon { font-size:2.5rem; margin-bottom:0.8rem; }
@@ -739,7 +783,7 @@ body {
       onkeydown="onNavSearch(event)" oninput="onNavSearchInput()"/>
   </div>
   <div class="nav-right" id="nav-right" style="position:relative;">
-    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">&#127769;</button>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">&#9728;</button>
     <div id="nav-guest" style="display:flex;gap:0.4rem;align-items:center;">
       <button class="nav-btn nav-btn-ghost" onclick="openAuth('login')">Log In</button>
       <button class="nav-btn nav-btn-primary" onclick="openAuth('signup')">Join Free</button>
@@ -751,7 +795,7 @@ body {
     <div class="profile-dd" id="profile-dd">
       <div class="pdd-head">
         <div class="pdd-name" id="dd-name">Archivable User</div>
-        <div class="pdd-email" id="dd-email">user@example.com</div>
+        <div class="pdd-email" id="dd-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="f98c8a9c8bb99c81989489959cd79a9694">[email&#160;protected]</a></div>
         <div class="pdd-trust">&#10003; Verified Member</div>
       </div>
       <div class="pdd-items">
@@ -814,7 +858,14 @@ body {
 <div class="view" id="view-trending"><div class="content-header"><div class="content-header-title">&#128293; Trending</div><div class="content-header-sub">Most upvoted records in the archive</div></div><div class="doc-list" id="trending-list"><div class="loading-state">Loading...</div></div></div>
 <div class="view" id="view-new"><div class="content-header"><div class="content-header-title">&#127381; New Arrivals</div><div class="content-header-sub">Most recently added to the archive</div></div><div class="doc-list" id="new-list"><div class="loading-state">Loading...</div></div></div>
 <div class="view" id="view-search"><div class="content-header"><div class="content-header-title" id="search-title">Search Results</div><div class="content-header-sub" id="search-sub"></div></div><div class="doc-list" id="search-list"><div class="loading-state">Enter a search term above</div></div></div>
-<div class="view" id="view-category"><div class="content-header"><div class="content-header-title" id="cat-view-title">Category</div><div class="content-header-sub" id="cat-view-sub"></div></div><div class="doc-list" id="cat-doc-list"><div class="loading-state">Loading...</div></div></div>
+<div class="view" id="view-category">
+  <div id="cat-banner-area"></div>
+  <div class="content-header" style="border-top:none;">
+    <div class="content-header-title" id="cat-view-title" style="display:none;"></div>
+    <div class="content-header-sub" id="cat-view-sub" style="display:none;"></div>
+  </div>
+  <div class="doc-list" id="cat-doc-list"><div class="loading-state">Loading...</div></div>
+</div>
 <div class="view" id="view-document"><div id="doc-detail-content"><div class="loading-state">Loading document...</div></div></div>
 <div class="view" id="view-about">
   <div class="content-header"><div class="content-header-title">About Archivable</div><div class="content-header-sub">The world's permanent community archive</div></div>
@@ -912,7 +963,7 @@ body {
 </div>
 <div id="confirm-banner" style="display:none;position:fixed;top:calc(var(--nav-h) + 8px);left:50%;transform:translateX(-50%);background:var(--navy);color:white;padding:0.9rem 1.4rem;border-radius:var(--radius);box-shadow:var(--shadow-3);z-index:350;align-items:center;gap:0.8rem;font-size:0.85rem;max-width:500px;width:90%;border-left:3px solid var(--teal);"><span>Check your email! Confirmation link sent to <strong id="confirm-email"></strong></span><button onclick="document.getElementById('confirm-banner').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,0.5);font-size:1.2rem;cursor:pointer;margin-left:auto;">&#215;</button></div>
 <div id="toastEl"></div>
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── ARCHIVABLE v10 — APP SCRIPT ──
 const { createClient } = supabase;
 const sb = createClient("https://ijeeqroglycxtqinrdxp.supabase.co", "sb_publishable_VMz5gRkD4lOehj9Z-GixdA_zh-Yno2Z");
@@ -931,7 +982,7 @@ var isMobile = window.innerWidth <= 768;
 
 // ── THEME ──
 function initTheme() {
-  var saved = localStorage.getItem("arch-theme") || "light";
+  var saved = localStorage.getItem("arch-theme") || "dark";
   setTheme(saved, false);
 }
 function setTheme(t, save) {
@@ -1005,7 +1056,9 @@ function navigate(view, params) {
   var activeItem = document.querySelector('.sb-item[data-view="' + view + '"]');
   if (activeItem) activeItem.classList.add("active");
   if (view === "category") {
-    var catItem = document.querySelector('.sb-item[data-cat="' + params.category + '"]');
+    var rawC = (params.category||"").replace(/&amp;/g,"&");
+    var catItem = document.querySelector('.sb-item[data-cat="' + rawC + '"]');
+    if (!catItem) catItem = document.querySelector('.sb-item[data-cat="' + (params.category||"") + '"]');
     if (catItem) catItem.classList.add("active");
   }
 
@@ -1014,7 +1067,11 @@ function navigate(view, params) {
   else if (view === "trending") renderTrending();
   else if (view === "new") renderNew();
   else if (view === "search") renderSearch(params.q || "");
-  else if (view === "category") renderCategory(params.category);
+  else if (view === "category") {
+    var rawCat = params.category || "";
+    rawCat = rawCat.replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&#39;/g,"'");
+    renderCategory(rawCat);
+  }
   else if (view === "document") renderDocument(params.doc);
   else if (view === "about") renderAbout();
   else if (view === "profile") renderProfile();
@@ -1093,6 +1150,8 @@ function renderNew() {
 
 // ── RENDER CATEGORY ──
 function renderCategory(cat) {
+  // Decode HTML entities from sidebar onclick attributes
+  cat = cat.replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&#39;/g,"'").replace(/&quot;/g,'"');
   activeCategory = cat;
   var titleEl = document.getElementById("cat-view-title");
   var subEl = document.getElementById("cat-view-sub");
@@ -1102,6 +1161,11 @@ function renderCategory(cat) {
   if (titleEl) titleEl.textContent = catIcon + " " + cat;
   var docs = allDocs.filter(function(d){ return d.category===cat; });
   if (subEl) subEl.textContent = docs.length + " record" + (docs.length!==1?"s":"") + " in this category";
+
+  // Render banner + docs together
+  var bannerEl = document.getElementById("cat-banner-area");
+  if (bannerEl) bannerEl.innerHTML = renderCategoryBanner(cat, docs.length);
+
   if (docs.length===0) {
     list.innerHTML = '<div class="empty-state"><div class="empty-icon">📂</div><div class="empty-title">No records yet</div><div class="empty-sub">Be the first to contribute to this category</div><button class="btn btn-teal" onclick="openUpload()">+ Contribute</button></div>';
     return;
@@ -1511,6 +1575,127 @@ document.addEventListener("DOMContentLoaded", async function() {
     }
   });
 });
+
+var CAT_BANNERS = {
+  "Property & Floor Plans": {
+    gradient: "135deg, #1a3a2a 0%, #0d2318 100%",
+    accent: "#2ecc71",
+    icon: "🏠",
+    tagline: "Architectural drawings, floor plans & property records",
+    pattern: "repeating-linear-gradient(45deg, rgba(46,204,113,0.03) 0px, rgba(46,204,113,0.03) 1px, transparent 1px, transparent 10px)"
+  },
+  "Family Trees & Genealogy": {
+    gradient: "135deg, #2a1a3a 0%, #180d23 100%",
+    accent: "#9b59b6",
+    icon: "🌳",
+    tagline: "Ancestral records, genealogy & living family histories",
+    pattern: "repeating-linear-gradient(60deg, rgba(155,89,182,0.03) 0px, rgba(155,89,182,0.03) 1px, transparent 1px, transparent 12px)"
+  },
+  "Iconic & Pop Culture": {
+    gradient: "135deg, #3a2a1a 0%, #231808 100%",
+    accent: "#e67e22",
+    icon: "🎬",
+    tagline: "Cultural artefacts, iconic moments & pop culture history",
+    pattern: "repeating-linear-gradient(30deg, rgba(230,126,34,0.04) 0px, rgba(230,126,34,0.04) 1px, transparent 1px, transparent 14px)"
+  },
+  "Historical & Legal": {
+    gradient: "135deg, #1a2a3a 0%, #0d1823 100%",
+    accent: "#3498db",
+    icon: "📜",
+    tagline: "Legal charters, founding documents & historical records",
+    pattern: "repeating-linear-gradient(0deg, rgba(52,152,219,0.03) 0px, rgba(52,152,219,0.03) 1px, transparent 1px, transparent 16px)"
+  },
+  "Architecture & Engineering": {
+    gradient: "135deg, #0d1f3a 0%, #071428 100%",
+    accent: "#0bc5b0",
+    icon: "🗺",
+    tagline: "Blueprints, structural drawings & engineering masterworks",
+    pattern: "repeating-linear-gradient(90deg, rgba(11,197,176,0.04) 0px, rgba(11,197,176,0.04) 1px, transparent 1px, transparent 40px), repeating-linear-gradient(0deg, rgba(11,197,176,0.04) 0px, rgba(11,197,176,0.04) 1px, transparent 1px, transparent 40px)"
+  },
+  "Government & Political": {
+    gradient: "135deg, #1a1a2e 0%, #0f0f1e 100%",
+    accent: "#e74c3c",
+    icon: "🏛",
+    tagline: "Treaties, constitutions, declarations & political records",
+    pattern: "repeating-linear-gradient(45deg, rgba(231,76,60,0.03) 0px, rgba(231,76,60,0.03) 1px, transparent 1px, transparent 20px)"
+  },
+  "Military & War": {
+    gradient: "135deg, #1a1a14 0%, #100f08 100%",
+    accent: "#f39c12",
+    icon: "⚔",
+    tagline: "Battle maps, military records & declassified documents",
+    pattern: "repeating-linear-gradient(60deg, rgba(243,156,18,0.03) 0px, rgba(243,156,18,0.03) 1px, transparent 1px, transparent 18px)"
+  },
+  "Science & Medicine": {
+    gradient: "135deg, #0d2a2a 0%, #071a1a 100%",
+    accent: "#1abc9c",
+    icon: "🔬",
+    tagline: "Research papers, medical records & scientific discoveries",
+    pattern: "radial-gradient(circle at 20% 50%, rgba(26,188,156,0.05) 0%, transparent 40%), radial-gradient(circle at 80% 50%, rgba(26,188,156,0.05) 0%, transparent 40%)"
+  },
+  "News & Media": {
+    gradient: "135deg, #1a1a1a 0%, #0d0d0d 100%",
+    accent: "#ecf0f1",
+    icon: "📰",
+    tagline: "Historic front pages, broadcasts & landmark journalism",
+    pattern: "repeating-linear-gradient(0deg, rgba(236,240,241,0.02) 0px, rgba(236,240,241,0.02) 1px, transparent 1px, transparent 22px)"
+  },
+  "Art & Manuscripts": {
+    gradient: "135deg, #2a1a1a 0%, #1a0d0d 100%",
+    accent: "#e74c3c",
+    icon: "🎨",
+    tagline: "Original artworks, handwritten manuscripts & rare texts",
+    pattern: "radial-gradient(ellipse at 30% 70%, rgba(231,76,60,0.06) 0%, transparent 50%)"
+  },
+  "Images & Photography": {
+    gradient: "135deg, #1a1a2a 0%, #0d0d1a 100%",
+    accent: "#8e44ad",
+    icon: "📸",
+    tagline: "Historic photographs, documentary images & visual records",
+    pattern: "repeating-linear-gradient(45deg, rgba(142,68,173,0.03) 0px, rgba(142,68,173,0.03) 1px, transparent 1px, transparent 16px)"
+  },
+  "Technical Drawings": {
+    gradient: "135deg, #0d1a2a 0%, #071018 100%",
+    accent: "#2980b9",
+    icon: "📐",
+    tagline: "Mechanical drawings, schematics & precision technical records",
+    pattern: "repeating-linear-gradient(90deg, rgba(41,128,185,0.05) 0px, rgba(41,128,185,0.05) 1px, transparent 1px, transparent 30px), repeating-linear-gradient(0deg, rgba(41,128,185,0.05) 0px, rgba(41,128,185,0.05) 1px, transparent 1px, transparent 30px)"
+  },
+  "Music & Entertainment": {
+    gradient: "135deg, #1a0d2a 0%, #110818 100%",
+    accent: "#e056fd",
+    icon: "🎵",
+    tagline: "Scores, setlists, contracts & entertainment records",
+    pattern: "repeating-linear-gradient(30deg, rgba(224,86,253,0.03) 0px, rgba(224,86,253,0.03) 1px, transparent 1px, transparent 14px)"
+  },
+  "Sport & Recreation": {
+    gradient: "135deg, #0d2a1a 0%, #071810 100%",
+    accent: "#27ae60",
+    icon: "🏆",
+    tagline: "Match records, scorecards, contracts & sporting history",
+    pattern: "repeating-linear-gradient(45deg, rgba(39,174,96,0.04) 0px, rgba(39,174,96,0.04) 1px, transparent 1px, transparent 18px)"
+  },
+};
+
+function renderCategoryBanner(cat, count) {
+  var cfg = CAT_BANNERS[cat] || {
+    gradient: "135deg, #1a1a2a 0%, #0d0d18 100%",
+    accent: "#0bc5b0", icon: "📄",
+    tagline: "Records and documents in this category",
+    pattern: ""
+  };
+  return '<div class="cat-banner">'
+    + '<div class="cat-banner-bg" style="background:linear-gradient(' + cfg.gradient + ');"></div>'
+    + (cfg.pattern ? '<div style="position:absolute;inset:0;z-index:0;background:' + cfg.pattern + ';"></div>' : '')
+    + '<div class="cat-banner-icon">' + cfg.icon + '</div>'
+    + '<div class="cat-banner-inner">'
+    + '<div class="cat-banner-label">Category</div>'
+    + '<div class="cat-banner-title">' + getCatIcon(cat) + ' ' + esc(cat) + '</div>'
+    + '<div class="cat-banner-tagline">' + cfg.tagline + '</div>'
+    + '<div class="cat-banner-count">' + count + ' record' + (count !== 1 ? 's' : '') + ' in this category</div>'
+    + '</div>'
+    + '</div>';
+}
 
 // Patch docListItemHtml to add data-docid for event delegation
 var _origCard = docListItemHtml;
