@@ -1314,7 +1314,7 @@ function docListItemHtml(d) {
   var sc = d.status==="verified"?"sb-verified":d.status==="pending"?"sb-pending":"sb-community";
   var sl = d.status==="verified"?"✓ Verified":d.status==="pending"?"⏳ Under Review":"◆ Community";
   var icon = getCatIcon(d.category);
-  return '<div class="doc-list-item" onclick="navigate(\'document\',{doc:getDocs(\''+d.id+'\')})">'
+  return '<div class="doc-list-item" data-docid="'+d.id+'" onclick="navigate(\'document\',{doc:getDocs(\''+d.id+'\')})">'
     +'<div class="doc-vote-col">'
     +'<button class="vote-up" onclick="voteDoc(\'up\',\''+d.id+'\',this,event)">▲</button>'
     +'<div class="vote-count" id="vc-'+d.id+'">'+(d.upvotes||0)+'</div>'
@@ -1697,11 +1697,6 @@ function renderCategoryBanner(cat, count) {
     + '</div>';
 }
 
-// Patch docListItemHtml to add data-docid for event delegation
-var _origCard = docListItemHtml;
-function docListItemHtml(d) {
-  return _origCard(d).replace('class="doc-list-item"', 'class="doc-list-item" data-docid="'+d.id+'"');
-}
 // Also patch setHomeSort to handle quick-cat active state
 var _origSort = setHomeSort;
 function setHomeSort(tab) {
