@@ -1437,13 +1437,12 @@ function renderProfile() {
     wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">👤</div><div class="empty-title">Sign in to view your profile</div><button class="btn btn-teal" onclick="openAuth(\'login\')">Log In</button></div>';
     return;
   }
-  var name = (currentUser.profile&&currentUser.profile.display_name)||currentUser.email.split("@")[0];
+  var name = (currentUser.profile&&currentUser.profile.display_name)||("Archiver"+currentUser.id.slice(0,6));
   var userDocs = allDocs.filter(function(d){ return d.contributor_name===name; });
   wrap.innerHTML = '<div style="padding:1.5rem">'
     +'<div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">'
     +'<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--orange));display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:white;">'+name.charAt(0).toUpperCase()+'</div>'
     +'<div><div style="font-family:Lora,serif;font-weight:600;font-size:1.2rem;color:var(--text);">'+esc(name)+'</div>'
-    +'<div style="font-size:0.78rem;color:var(--text-3);">'+esc(currentUser.email)+'</div>'
     +'<div style="font-size:0.7rem;color:var(--teal);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-top:0.2rem;">✓ Verified Member</div></div>'
     +'</div>'
     +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.5rem;">'
@@ -1604,7 +1603,7 @@ async function initAuth() {
 async function loadProfile(user) {
   var res = await sb.from("profiles").select("*").eq("id",user.id).single();
   if (res.error||!res.data) {
-    var name=(user.user_metadata&&(user.user_metadata.full_name||user.user_metadata.name))||user.email.split("@")[0];
+    var name=(user.user_metadata&&(user.user_metadata.full_name||user.user_metadata.name))||("Archiver"+user.id.slice(0,6));
     await sb.from("profiles").upsert({id:user.id,email:user.email,display_name:name,trust_level:"basic",contribution_count:0});
     user.profile={display_name:name,trust_level:"basic"};
   } else { user.profile=res.data; }
@@ -1618,13 +1617,13 @@ function updateNav(loggedIn) {
   if (member) member.style.display = loggedIn?"flex":"none";
   if (sbLogin) sbLogin.style.display = loggedIn?"none":"block";
   if (loggedIn&&currentUser) {
-    var name=(currentUser.profile&&currentUser.profile.display_name)||currentUser.email.split("@")[0];
+    var name=(currentUser.profile&&currentUser.profile.display_name)||("Archiver"+currentUser.id.slice(0,6));
     var init = document.getElementById("nav-init");
     if (init) init.textContent=name.charAt(0).toUpperCase();
     var ddName = document.getElementById("dd-name");
     var ddEmail = document.getElementById("dd-email");
     if (ddName) ddName.textContent=name;
-    if (ddEmail) ddEmail.textContent=currentUser.email;
+    if (ddEmail) ddEmail.style.display="none";
   }
 }
 
@@ -1668,12 +1667,13 @@ async function handleAuth() {
   var name=document.getElementById("auth-name").value.trim();
   var su=document.getElementById("auth-tab-up").classList.contains("on");
   var btn=document.getElementById("auth-btn");
+  if(su&&!name){showAuthError("Please enter your display name");return;}
   if(!email){showAuthError("Please enter your email");return;}
   if(!password||password.length<6){showAuthError("Password must be at least 6 characters");return;}
   btn.textContent=su?"Creating account...":"Logging in..."; btn.disabled=true;
   try {
     if(su){
-      var r=await sb.auth.signUp({email:email,password:password,options:{data:{full_name:name||email.split("@")[0]},emailRedirectTo:window.location.href}});
+      var r=await sb.auth.signUp({email:email,password:password,options:{data:{full_name:name},emailRedirectTo:window.location.href}});
       if(r.error) throw r.error;
       if(r.data.user&&!r.data.session){
         closeAuth();
