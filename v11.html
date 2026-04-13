@@ -1438,12 +1438,19 @@ function renderProfile() {
     return;
   }
   var name = (currentUser.profile&&currentUser.profile.display_name)||("Archiver"+currentUser.id.slice(0,6));
+  var isDefault = /^Archiver[0-9a-f]{6}$/i.test(name);
   var userDocs = allDocs.filter(function(d){ return d.contributor_name===name; });
   wrap.innerHTML = '<div style="padding:1.5rem">'
     +'<div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">'
     +'<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--orange));display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:white;">'+name.charAt(0).toUpperCase()+'</div>'
-    +'<div><div style="font-family:Lora,serif;font-weight:600;font-size:1.2rem;color:var(--text);">'+esc(name)+'</div>'
-    +'<div style="font-size:0.7rem;color:var(--teal);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-top:0.2rem;">✓ Verified Member</div></div>'
+    +'<div id="profile-name-area">'
+      +'<div style="display:flex;align-items:center;gap:0.5rem;">'
+        +'<div style="font-family:Lora,serif;font-weight:600;font-size:1.2rem;color:var(--text);">'+esc(name)+'</div>'
+        +'<button onclick="openEditName()" style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:0.75rem;padding:0.1rem 0.4rem;border-radius:3px;transition:color 0.15s;" onmouseover="this.style.color=\'var(--teal)\'" onmouseout="this.style.color=\'var(--text-3)\'" title="Edit display name">✏ Edit</button>'
+      +'</div>'
+      +'<div style="font-size:0.7rem;color:var(--teal);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-top:0.2rem;">✓ Verified Member</div>'
+      +(isDefault?'<div style="font-size:0.74rem;color:var(--orange);margin-top:0.35rem;">Auto-generated username — click Edit to set a custom name.</div>':'')
+    +'</div>'
     +'</div>'
     +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.5rem;">'
     +'<div style="background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;text-align:center;"><div style="font-family:Lora,serif;font-weight:700;font-size:1.4rem;color:var(--teal);">'+userDocs.length+'</div><div style="font-size:0.7rem;color:var(--text-3);text-transform:uppercase;letter-spacing:0.07em;">Contributions</div></div>'
@@ -1452,6 +1459,44 @@ function renderProfile() {
     +'</div>'
     +(userDocs.length>0?'<div style="font-family:Lora,serif;font-weight:600;font-size:1rem;color:var(--text);margin-bottom:0.75rem;">Your Contributions</div><div class="doc-list">'+userDocs.map(function(d){return docListItemHtml(d);}).join("")+'</div>':'<div class="empty-state"><div class="empty-icon">📤</div><div class="empty-title">No contributions yet</div><div class="empty-sub">Upload your first document to earn the Origin badge</div><button class="btn btn-teal" onclick="openUpload()">+ Contribute</button></div>')
     +'</div>';
+}
+
+// ── EDIT DISPLAY NAME ──
+function openEditName() {
+  var area = document.getElementById("profile-name-area");
+  if (!area) return;
+  var current = (currentUser.profile&&currentUser.profile.display_name)||"";
+  area.innerHTML = '<div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">'
+    +'<input id="edit-name-input" class="form-input" style="width:190px;padding:0.35rem 0.6rem;font-size:0.9rem;" maxlength="40" value="'+esc(current)+'" placeholder="Your display name"/>'
+    +'<button class="btn btn-teal" style="padding:0.35rem 0.85rem;font-size:0.8rem;" onclick="saveDisplayName()">Save</button>'
+    +'<button class="btn" style="padding:0.35rem 0.7rem;font-size:0.8rem;background:var(--bg-3);border:1px solid var(--border);" onclick="renderProfile()">Cancel</button>'
+    +'<div id="edit-name-error" style="font-size:0.78rem;color:#e05;display:none;width:100%;margin-top:0.2rem;"></div>'
+    +'</div>';
+  var inp = document.getElementById("edit-name-input");
+  if (inp) { inp.focus(); inp.select(); inp.addEventListener("keydown",function(e){if(e.key==="Enter")saveDisplayName();if(e.key==="Escape")renderProfile();}); }
+}
+
+async function saveDisplayName() {
+  var inp = document.getElementById("edit-name-input");
+  var errEl = document.getElementById("edit-name-error");
+  if (!inp) return;
+  var val = inp.value.trim();
+  if (!val || val.length < 2) {
+    if (errEl) { errEl.textContent="Name must be at least 2 characters"; errEl.style.display="block"; }
+    return;
+  }
+  inp.disabled = true;
+  var r = await sb.from("profiles").update({display_name:val}).eq("id",currentUser.id);
+  if (r.error) {
+    inp.disabled = false;
+    if (errEl) { errEl.textContent=r.error.message||"Could not save — try again"; errEl.style.display="block"; }
+    return;
+  }
+  if (!currentUser.profile) currentUser.profile = {};
+  currentUser.profile.display_name = val;
+  updateNav(true);
+  renderProfile();
+  toast("Display name updated!");
 }
 
 // ── DOC LIST ITEM HTML ──
